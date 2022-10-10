@@ -36,6 +36,9 @@ td:last-of-type
 .sorting {
     background: black;
     color: white;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 6px;
 }
 
 .sortable {

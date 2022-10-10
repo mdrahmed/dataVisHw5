@@ -241,7 +241,91 @@ class Table {
         /**
          * update the column headers based on the sort state
          */
+        let headers = d3.select('#columnHeaders')
+            .selectAll('th')
+            // .data(this.tableData => console.log(this.tableData))
+            .data(this.headerData)
+            .attr('id', d => d.key)
 
+        // worked
+        headers.attr('class', function(d){
+            console.log(d)
+            if(d.key === 'state'){
+                if(d.sorted === true){
+                    console.log(d.key)
+                    if(d.ascending === true){
+                            d3.select(this).select('i')
+                            .attr('class','fas fa-sort-up')
+                    }
+                    else{
+                        d3.select(this).select('i')
+                            .attr('class','fas fa-sort-down')
+                    }
+                    d3.select('#mean_netpartymargin')
+                        .attr('class', 'sortable')
+                        .select('i')
+                            .attr('class','fas no-display')
+                    // d3.select('#winner_Rparty')
+                    //     .attr('class', 'sortable')
+                    d3.select(this)
+                        // .attr('class', 'sorting')
+                        return 'sorting'
+                }
+            }
+            else if(d.key === 'mean_netpartymargin'){
+                console.log(d.key)
+                if(d.sorted === true){
+                    console.log(d.key)
+                    if(d.ascending === true){
+                            d3.select(this).select('i')
+                            .attr('class','fas fa-sort-up')
+                    }
+                    else{
+                        d3.select(this).select('i')
+                            .attr('class','fas fa-sort-down')
+                    }
+                    d3.select('#state')
+                        .attr('class', 'sortable')
+                        .select('i')
+                            .attr('class','fas no-display')
+                    // d3.select('#winner_Rparty')
+                    //     .attr('class', 'sortable')
+                    d3.select(this)
+                        // .attr('class', 'sorting')
+                        return 'sorting'
+                }
+            }
+            return 'sortable'
+            
+        })
+
+
+
+        // headers.attr('class', function(d){
+        //         console.log(d)
+        //         if(d.key === 'state'){
+        //             if(d.sorted === true){
+        //                 console.log(d.key)
+        //                 if(d.ascending === true){
+        //                         d3.select(this).select('i')
+        //                         .attr('class','fas fa-sort-up')
+        //                 }
+        //                 else{
+        //                     d3.select(this).select('i')
+        //                         .attr('class','fas fa-sort-down')
+        //                 }
+        //                 d3.select('#mean_netpartymargin')
+        //                     .attr('class', 'sortable')
+        //                     .select('i')
+        //                         .attr('class','fas no-display')
+        //                 // d3.select('#winner_Rparty')
+        //                 //     .attr('class', 'sortable')
+        //                 d3.select(this)
+        //                     // .attr('class', 'sorting')
+        //                     return 'sorting'
+        //             }
+        //         }
+        //     })
      
     }
 
@@ -414,36 +498,48 @@ class Table {
                             // .data(this.tableData => console.log(this.tableData))
                             .data(this.headerData)
                             .on('click', function(d){
-                                console.log(d)
-                                console.log(d.path[0].__data__.key)
-                                console.log(that.tableData)
+                                // console.log(d)
+                                // console.log(d.path[0].__data__.key)
+                                // console.log(that.tableData)
 
                                 if (d.path[0].__data__.key === "state"){
+                                    d.srcElement.nextElementSibling.__data__.sorted  = false;
+                                    d.srcElement.nextElementSibling.__data__.ascending  = false;
+                                    d.path[0].__data__.sorted = true;
+                                    // console.log(d3.select('#mean_netpartymargin'))
                                     if (d.path[0].__data__.ascending === false) {
                                         that.tableData = that.tableData.sort((a,b) => {
                                             return a['state'] < b['state'] ? -1 : 1;
                                         });
                                     d.path[0].__data__.ascending = true;
+                                    // d.path[0].__data__.sorted = true;
                                     that.drawTable();
                                     }
                                     else if (d.path[0].__data__.ascending === true) {
                                         that.tableData = that.tableData.sort((a,b) => a["state"] > b["state"] ? -1 : 1);
                                         d.path[0].__data__.ascending = false;
+                                        // d.path[0].__data__.sorted = false;
                                         that.drawTable();
                                     }
                                 }
 
                                 if (d.path[0].__data__.key === "mean_netpartymargin"){
+                                    // console.log('prev:', d.srcElement.previousElementSibling)
+                                    d.srcElement.previousElementSibling.__data__.sorted  = false;
+                                    d.srcElement.previousElementSibling.__data__.ascending  = false;
+                                    d.path[0].__data__.sorted = true;
                                     if (d.path[0].__data__.ascending === false) {
                                         that.tableData = that.tableData.sort((a,b) => {
                                             return Math.abs(a['mean_netpartymargin']) < Math.abs(b['mean_netpartymargin']) ? -1 : 1;
                                         });
                                     d.path[0].__data__.ascending = true;
+                                    // d.path[0].__data__.sorted = true;
                                     that.drawTable();
                                     }
                                     else if (d.path[0].__data__.ascending === true) {
                                         that.tableData = that.tableData.sort((a,b) => Math.abs(a['mean_netpartymargin']) > Math.abs(b['mean_netpartymargin']) ? -1 : 1);
                                         d.path[0].__data__.ascending = false;
+                                        // d.path[0].__data__.sorted = false;
                                         that.drawTable();
                                     }
                                 }
