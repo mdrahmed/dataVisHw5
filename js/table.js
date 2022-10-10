@@ -162,11 +162,11 @@ class Table {
         /**
          * with the forecastSelection you need to set the text based on the data value as long as the type is 'text'
          */
-        console.log("forecastSe:",forecastSelection);
+        // console.log("forecastSe:",forecastSelection);
         forecastSelection.filter(d => d.type === "text").text((d)=> d.value)
 
         let vizSelection = forecastSelection.filter(d => d.type === 'viz');
-        console.log("viz",vizSelection)
+
         let svgSelect = vizSelection.selectAll('svg')
             // .data(d => {
             //     // console.log("d:",d)
@@ -252,13 +252,8 @@ class Table {
         /**
          * add gridlines to the vizualization
         //  */
-        console.log("container:",containerSelect,"ticks:",ticks);
+        // console.log("container:",containerSelect,"ticks:",ticks);
 
-        // let margin_svg = d3.select("#marginAxis")
-        //                     .attr("width",this.vizWidth)
-        //                     .attr("height",this.vizHeight);
-        
-// this svg 1st group is already present inside counterSelect, so, I simply add the lines
         containerSelect.selectAll('line')
                     .data(ticks)
                     .join('line')
@@ -297,7 +292,97 @@ class Table {
         /**
          * add rectangles for the bar charts
          */
-       
+        // console.log(containerSelect)
+        // console.log(this.scaleX(-0.4384384))
+        // console.log(this.scaleX(containerSelect._parents[0].__data__.value.marginLow))
+        // console.log(this.scaleX(containerSelect._parents[0].__data__.value.marginHigh))
+        // console.log(this.scaleX(containerSelect._parents[0].__data__.value.marginHigh) - this.scaleX(containerSelect._parents[0].__data__.value.marginLow))
+        // console.log(containerSelect._parents)
+
+        // const margins = containerSelect._parents.map((row) => {
+        //     // console.log(row.__data__.value.marginLow)
+        //     return row.__data__.value
+        // })
+        // console.log("only margins:", margins)
+        // let arr = [23,34,10]
+
+        console.log("scaleX 0:",this.scaleX(0))
+        // let scale = this
+    //worked
+        // containerSelect.selectAll('rect')
+        //                 .data(d => [d])
+        //                 .join('rect')
+        //                         .attr('x',d => {
+        //                             return this.scaleX(d.value.marginLow)
+        //                         })
+        //                         .attr('width',d => {
+        //                             console.log(d)
+        //                             // return this.scaleX(d.__data__.value.marginHigh)-this.scaleX(d.__data__.value.marginLow)
+        //                             return this.scaleX(d.value.marginHigh)-this.scaleX(d.value.marginLow)
+
+        //                         })
+        //                         .attr('height',this.vizHeight-10)
+        //                         .attr('class','biden')
+
+        
+        // let scale  = this.scaleX; 
+        let container = containerSelect.selectAll('rect') 
+                    .data(this.marginLoHi)
+                    .join('rect')
+                        .attr('x',d => {
+                            console.log(d);
+                            return this.scaleX(d.marginLow);
+                        })
+                        .attr('width',d => {
+                            console.log(d);
+                            return this.scaleX(d.marginHigh)-this.scaleX(d.marginLow);
+                        })
+                        .attr('height',this.vizHeight-10)
+                        .attr('class',d => (d.marginHigh<=0)?'biden':'trump')
+                        .classed('margin-bar',true)
+        
+        // update();
+        // console.log("d")
+
+    }
+
+    marginLoHi(d){ 
+        // console.log(d)
+        let low_Biden;
+        let high_Biden;
+        let low_Trump;
+        let high_Trump;
+        if(d.value.marginHigh < 0){ 
+            low_Biden = d.value.marginLow 
+            high_Biden = d.value.marginHigh
+            low_Trump = 0
+            high_Trump = 0
+        }
+        else if(d.value.marginLow > 0){ 
+            low_Biden = 0
+            high_Biden = 0
+            low_Trump = d.value.marginLow 
+            high_Trump = d.value.marginHigh
+        }
+        else if (d.value.marginHigh > 0 && d.value.marginLow < 0){
+            low_Biden = d.value.marginLow 
+            high_Biden = 0
+            low_Trump = 0
+            high_Trump = d.value.marginHigh
+        }
+        else { 
+            low_Biden = 0
+            high_Biden = 0
+            low_Trump = 0 
+            high_Trump = 0
+        } 
+        let biden = {marginLow: low_Biden,
+        marginHigh: high_Biden}
+        let trump = {marginLow: low_Trump,
+            marginHigh: high_Trump}
+        let data = [biden, trump];
+        // console.log(data);
+        return data;
     }
 
     addCircles(containerSelect) {
