@@ -293,7 +293,6 @@ class Table {
          * add rectangles for the bar charts
          */
         // console.log(containerSelect)
-        // console.log(this.scaleX(-0.4384384))
         // console.log(this.scaleX(containerSelect._parents[0].__data__.value.marginLow))
         // console.log(this.scaleX(containerSelect._parents[0].__data__.value.marginHigh))
         // console.log(this.scaleX(containerSelect._parents[0].__data__.value.marginHigh) - this.scaleX(containerSelect._parents[0].__data__.value.marginLow))
@@ -306,7 +305,7 @@ class Table {
         // console.log("only margins:", margins)
         // let arr = [23,34,10]
 
-        console.log("scaleX 0:",this.scaleX(0))
+        // console.log("scaleX 0:",this.scaleX(0))
         // let scale = this
     //worked
         // containerSelect.selectAll('rect')
@@ -330,11 +329,11 @@ class Table {
                     .data(this.marginLoHi)
                     .join('rect')
                         .attr('x',d => {
-                            console.log(d);
+                            // console.log(d);
                             return this.scaleX(d.marginLow);
                         })
                         .attr('width',d => {
-                            console.log(d);
+                            // console.log(d);
                             return this.scaleX(d.marginHigh)-this.scaleX(d.marginLow);
                         })
                         .attr('height',this.vizHeight-10)
@@ -347,7 +346,6 @@ class Table {
     }
 
     marginLoHi(d){ 
-        // console.log(d)
         let low_Biden;
         let high_Biden;
         let low_Trump;
@@ -376,11 +374,7 @@ class Table {
             low_Trump = 0 
             high_Trump = 0
         } 
-        let biden = {marginLow: low_Biden,
-        marginHigh: high_Biden}
-        let trump = {marginLow: low_Trump,
-            marginHigh: high_Trump}
-        let data = [biden, trump];
+        let data = [{marginLow: low_Biden, marginHigh: high_Biden}, {marginLow: low_Trump, marginHigh: high_Trump}];
         // console.log(data);
         return data;
     }
@@ -392,7 +386,16 @@ class Table {
         /**
          * add circles to the vizualizations
          */
-
+         containerSelect.selectAll('circle') 
+                        .data(d => [d])
+                        .join('circle')
+                            // .attr('cx',137.7031005+((160.97499299999998 - 137.7031005)/2))
+                            // .attr('cy',10)
+                            .attr('cx', d => (this.scaleX(d.value.marginLow)+((this.scaleX(d.value.marginHigh)-this.scaleX(d.value.marginLow))/2)))
+                            .attr('cy', 10)
+                            .attr('r',5)
+                            // .style('fill', 'green');
+                            .attr('class',d => ( (this.scaleX(d.value.marginLow)+((this.scaleX(d.value.marginHigh)-this.scaleX(d.value.marginLow))/2) <= this.scaleX(0) )?'biden':'trump'))
       
     }
 
@@ -405,8 +408,48 @@ class Table {
          * Attach click handlers to all the th elements inside the columnHeaders row.
          * The handler should sort based on that column and alternate between ascending/descending.
          */
+        const that = this
+        let thSelection = d3.select('#columnHeaders')
+                            .selectAll('th')
+                            // .data(this.tableData => console.log(this.tableData))
+                            .data(this.headerData)
+                            .on('click', function(d){
+                                console.log(d)
+                                console.log(d.path[0].__data__.key)
+                                console.log(that.tableData)
 
-        
+                                if (d.path[0].__data__.key === "state"){
+                                    if (d.path[0].__data__.ascending === false) {
+                                        that.tableData = that.tableData.sort((a,b) => {
+                                            return a['state'] < b['state'] ? -1 : 1;
+                                        });
+                                    d.path[0].__data__.ascending = true;
+                                    that.drawTable();
+                                    }
+                                    else if (d.path[0].__data__.ascending === true) {
+                                        that.tableData = that.tableData.sort((a,b) => a["state"] > b["state"] ? -1 : 1);
+                                        d.path[0].__data__.ascending = false;
+                                        that.drawTable();
+                                    }
+                                }
+
+                                if (d.path[0].__data__.key === "mean_netpartymargin"){
+                                    if (d.path[0].__data__.ascending === false) {
+                                        that.tableData = that.tableData.sort((a,b) => {
+                                            return Math.abs(a['mean_netpartymargin']) < Math.abs(b['mean_netpartymargin']) ? -1 : 1;
+                                        });
+                                    d.path[0].__data__.ascending = true;
+                                    that.drawTable();
+                                    }
+                                    else if (d.path[0].__data__.ascending === true) {
+                                        that.tableData = that.tableData.sort((a,b) => Math.abs(a['mean_netpartymargin']) > Math.abs(b['mean_netpartymargin']) ? -1 : 1);
+                                        d.path[0].__data__.ascending = false;
+                                        that.drawTable();
+                                    }
+                                }
+                        
+                            })
+                               
     }
 
   
