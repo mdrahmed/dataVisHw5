@@ -6,6 +6,7 @@ class Table {
     constructor(forecastData, pollData) {
         this.forecastData = forecastData;
         this.tableData = [...forecastData];
+        this.originalTableData = [...forecastData]; // this data will be used after collapsing the table
         // add useful attributes
         for (let forecast of this.tableData)
         {
@@ -147,6 +148,7 @@ class Table {
             {
                 if (d.isForecast)
                 {
+                    // console.log(this.tableData.indexOf(d)) // index can be used to know the current state
                     this.toggleRow(d, this.tableData.indexOf(d));
                 }
             });
@@ -249,10 +251,10 @@ class Table {
 
         // worked
         headers.attr('class', function(d){
-            console.log(d)
+            // console.log(d)
             if(d.key === 'state'){
                 if(d.sorted === true){
-                    console.log(d.key)
+                    // console.log(d.key)
                     if(d.ascending === true){
                             d3.select(this).select('i')
                             .attr('class','fas fa-sort-up')
@@ -273,9 +275,9 @@ class Table {
                 }
             }
             else if(d.key === 'mean_netpartymargin'){
-                console.log(d.key)
+                // console.log(d.key)
                 if(d.sorted === true){
-                    console.log(d.key)
+                    // console.log(d.key)
                     if(d.ascending === true){
                             d3.select(this).select('i')
                             .attr('class','fas fa-sort-up')
@@ -380,34 +382,12 @@ class Table {
         // console.log(this.scaleX(containerSelect._parents[0].__data__.value.marginLow))
         // console.log(this.scaleX(containerSelect._parents[0].__data__.value.marginHigh))
         // console.log(this.scaleX(containerSelect._parents[0].__data__.value.marginHigh) - this.scaleX(containerSelect._parents[0].__data__.value.marginLow))
-        // console.log(containerSelect._parents)
+        // console.log(containerSelect)
 
         // const margins = containerSelect._parents.map((row) => {
         //     // console.log(row.__data__.value.marginLow)
         //     return row.__data__.value
         // })
-        // console.log("only margins:", margins)
-        // let arr = [23,34,10]
-
-        // console.log("scaleX 0:",this.scaleX(0))
-        // let scale = this
-    //worked
-        // containerSelect.selectAll('rect')
-        //                 .data(d => [d])
-        //                 .join('rect')
-        //                         .attr('x',d => {
-        //                             return this.scaleX(d.value.marginLow)
-        //                         })
-        //                         .attr('width',d => {
-        //                             console.log(d)
-        //                             // return this.scaleX(d.__data__.value.marginHigh)-this.scaleX(d.__data__.value.marginLow)
-        //                             return this.scaleX(d.value.marginHigh)-this.scaleX(d.value.marginLow)
-
-        //                         })
-        //                         .attr('height',this.vizHeight-10)
-        //                         .attr('class','biden')
-
-        
         // let scale  = this.scaleX; 
         let container = containerSelect.selectAll('rect') 
                     .data(this.marginLoHi)
@@ -425,7 +405,7 @@ class Table {
                         .classed('margin-bar',true)
         
         // update();
-        // console.log("d")
+        // console.log("d");
 
     }
 
@@ -471,16 +451,35 @@ class Table {
          * add circles to the vizualizations
          */
          containerSelect.selectAll('circle') 
-                        .data(d => [d])
+                        // .data(d => [d])
+                        .data(this.cxOfCircle)
                         .join('circle')
-                            // .attr('cx',137.7031005+((160.97499299999998 - 137.7031005)/2))
-                            // .attr('cy',10)
-                            .attr('cx', d => (this.scaleX(d.value.marginLow)+((this.scaleX(d.value.marginHigh)-this.scaleX(d.value.marginLow))/2)))
+                            // .attr('cx',this.scaleX(-2.20))
+                            .attr('cx', d => (this.scaleX(d.cx)))
+                            // // .attr('cy',10)
+                            // .attr('cx', d => (this.scaleX(d.value.marginLow)+((this.scaleX(d.value.marginHigh)-this.scaleX(d.value.marginLow))/2)))
                             .attr('cy', 10)
-                            .attr('r',5)
-                            // .style('fill', 'green');
-                            .attr('class',d => ( (this.scaleX(d.value.marginLow)+((this.scaleX(d.value.marginHigh)-this.scaleX(d.value.marginLow))/2) <= this.scaleX(0) )?'biden':'trump'))
+                            .attr('r',d => d.r)
+                            // // .style('fill', 'green');
+                            // .attr('class',d => ( (this.scaleX(d.value.marginLow)+((this.scaleX(d.value.marginHigh)-this.scaleX(d.value.marginLow))/2) <= this.scaleX(0) )?'biden':'trump'))
+                            .attr('class',d => (this.scaleX(d.cx) <= this.scaleX(0))?'biden':'trump')
       
+    }
+
+    cxOfCircle(d){
+        console.log(isNaN(d.value.marginLow))
+        let cxValue;
+        let rad;
+        if(isNaN(d.value.marginLow)){
+            cxValue = d.value.margin;
+            rad = 3.5;
+        }
+        else{
+            cxValue = d.value.marginLow+((d.value.marginHigh-d.value.marginLow)/2);
+            rad = 5;
+        }
+        let data = [{cx: cxValue, r: rad}]
+        return data;
     }
 
     attachSortHandlers() 
@@ -511,9 +510,9 @@ class Table {
                                         that.tableData = that.tableData.sort((a,b) => {
                                             return a['state'] < b['state'] ? -1 : 1;
                                         });
-                                    d.path[0].__data__.ascending = true;
-                                    // d.path[0].__data__.sorted = true;
-                                    that.drawTable();
+                                        d.path[0].__data__.ascending = true;
+                                        // d.path[0].__data__.sorted = true;
+                                        that.drawTable();
                                     }
                                     else if (d.path[0].__data__.ascending === true) {
                                         that.tableData = that.tableData.sort((a,b) => a["state"] > b["state"] ? -1 : 1);
@@ -558,7 +557,54 @@ class Table {
         /**
          * Update table data with the poll data and redraw the table.
          */
-     
+        // console.log(rowData, index)
+        // var alerts = [ 
+        //     {num : 1, app:'abc',message:'message'},
+        //     {num : 2, app:'helloagain',message:'another message'} 
+        // ]
+        // // alerts[1].abc = [{abc:'abc'}];
+        // alerts.splice(1, 0, 'abc')  // splice to add right at that place
+        // alerts.splice(0,1)
+        // console.log(alerts) 
+
+        // if(this.tableData.isExpanded === true){
+        //     console.log("expanded:",this.tableData.isExpanded)
+        //     this.tableData.isExpanded = false;
+        //     this.tableData = this.originalTableData;
+        //     console.log(this.tableData)
+        //     this.drawTable()
+        //     // return;
+        // }
+        let pollRow;
+        for (let row of this.pollData){
+            if (row[0] === rowData.state){
+                pollRow = row[1]
+                // console.log(this.tableData[index].isExpanded,row[1])
+                if(this.tableData[index].isExpanded === false){
+                    this.tableData[index].isExpanded = true;
+                    for(let values of row[1]){
+                        // console.log(values)
+                        this.tableData.splice(index+1,0,values)
+                    }
+                }
+                else{
+                    this.tableData[index].isExpanded = false;
+                    for(let values of row[1]){
+                        // console.log(values)
+                        this.tableData.splice(index+1,1)
+                    }
+                }
+                // this.tableData.splice(index+1,0,row[1])
+            }
+        }
+        // this.tableData[0].pollRow = pollRow;
+        // console.log("table with pull:",this.tableData)
+        // this.tableData.push(pollRow[1])
+        // this.tableData.splice(1,0,pollRow[1])
+        // this.tableData.splice(1,0,pollRow[2])
+        console.log(this.tableData)
+
+        this.drawTable()
     }
 
     collapseAll() {
