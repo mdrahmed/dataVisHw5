@@ -148,6 +148,7 @@ class Table {
                 if (d.isForecast)
                 {
                     // console.log(this.tableData.indexOf(d)) // index can be used to know the current state
+                    console.log("row clicked")
                     this.toggleRow(d, this.tableData.indexOf(d));
                 }
             });
@@ -466,7 +467,7 @@ class Table {
     }
 
     cxOfCircle(d){
-        console.log(isNaN(d.value.marginLow))
+        // console.log("inside circle:",isNaN(d.value.marginLow))
         let cxValue;
         let rad;
         if(isNaN(d.value.marginLow)){
@@ -491,7 +492,7 @@ class Table {
          * The handler should sort based on that column and alternate between ascending/descending.
          */
         // this.collapseAll();
-        console.log("tabledata inside sortHandler:",this.tableData);
+        // console.log("tabledata inside sortHandler:",this.tableData);
         const that = this;
         let thSelection = d3.select('#columnHeaders')
                             .selectAll('th')
@@ -500,7 +501,8 @@ class Table {
                             .on('click', function(d){
                                 // console.log(d)
                                 // console.log(d.path[0].__data__.key)
-                                // console.log(that.tableData)
+                                console.log("Clicked")
+                                that.collapseAll();
                                 if (d.path[0].__data__.key === "state"){
                                     d.srcElement.nextElementSibling.__data__.sorted  = false;
                                     d.srcElement.nextElementSibling.__data__.ascending  = false;
@@ -524,7 +526,7 @@ class Table {
                                     }
                                 }
 
-                                if (d.path[0].__data__.key === "mean_netpartymargin"){
+                                else    if (d.path[0].__data__.key === "mean_netpartymargin"){
                                     // console.log('prev:', d.srcElement.previousElementSibling)
                                     d.srcElement.previousElementSibling.__data__.sorted  = false;
                                     d.srcElement.previousElementSibling.__data__.ascending  = false;
@@ -532,6 +534,7 @@ class Table {
                                     if (d.path[0].__data__.ascending === false) {
                                         // that.collapseAll();
                                         that.tableData = that.tableData.sort((a,b) => {
+                                            // console.log(a,a['mean_netpartymargin'], b['mean_netpartymargin'])
                                             return Math.abs(a['mean_netpartymargin']) < Math.abs(b['mean_netpartymargin']) ? -1 : 1;
                                         });
                                     d.path[0].__data__.ascending = true;
@@ -551,24 +554,24 @@ class Table {
                                
     }
 
-  
-
-
     toggleRow(rowData, index) {
-        ////////////
+        //////////// 
         // PART 8 // 
         ////////////
         /**
          * Update table data with the poll data and redraw the table.
          */
         // console.log(rowData, index)
+        let indexOfObject;
         // var alerts = [ 
-        //     {num : 1, app:'abc',message:'message'},
+        //     {n : 1, app:'abc',message:'message'},
         //     {num : 2, app:'helloagain',message:'another message'} 
         // ]
         // // alerts[1].abc = [{abc:'abc'}];
-        // alerts.splice(1, 0, 'abc')  // splice to add right at that place
-        // alerts.splice(0,1)
+        // // alerts.splice(1, 0, 'abc')  // splice to add right at that place
+        // // alerts.splice(0,1)
+        // indexOfObject =alerts.findIndex(obj => obj.app==='abc');
+        // alerts.splice(indexOfObject,1)
         // console.log(alerts) 
 
         // if(this.tableData.isExpanded === true){
@@ -580,23 +583,37 @@ class Table {
         //     // return;
         // }
         let pollRow;
+        // console.log(this.tableData)
         for (let row of this.pollData){
             if (row[0] === rowData.state){
                 pollRow = row[1]
                 // console.log(this.tableData[index].isExpanded,row[1])
                 if(this.tableData[index].isExpanded === false){
                     this.tableData[index].isExpanded = true;
+                    console.log("clicked to expand", this.tableData[index].isExpanded)
                     for(let values of row[1]){
                         // console.log(values)
                         this.tableData.splice(index+1,0,values)
                     }
                 }
                 else{
+                    console.log("clicked to collapse", this.tableData[index].isExpanded)
                     this.tableData[index].isExpanded = false;
+                    console.log("clicked to collapse", this.tableData[index].isExpanded)
                     for(let values of row[1]){
-                        // console.log(values)
                         this.tableData.splice(index+1,1)
                     }
+                    // for(let values of row[1]){
+                    //     console.log(values)
+                    //     indexOfObject = this.tableData.findIndex(obj => obj.name === values.name)
+                    //     console.log("index:",indexOfObject)
+                    //     this.tableData.splice(indexOfObject,1)
+                    // }
+                    // console.log(row[1])
+                    // this.tableData = this.tableData.filter(d => {
+                    //     console.log("is expanded false:",d)
+                    //     return d.isForecast;
+                    // })
                 }
                 // this.tableData.splice(index+1,0,row[1])
             }
@@ -606,15 +623,21 @@ class Table {
         // this.tableData.push(pollRow[1])
         // this.tableData.splice(1,0,pollRow[1])
         // this.tableData.splice(1,0,pollRow[2])
-        console.log(this.tableData)
+        // console.log(this.tableData)
 
         this.drawTable()
     }
 
     collapseAll() {
         this.tableData = this.tableData.filter(d => d.isForecast)
+        for (let forecast of this.tableData)
+        {
+            forecast.isExpanded = false;
+        }
+
         // this.tableData = this.originalTableData;
-        console.log("tableData collapseAll:",this.tableData)
+        // console.log("Original TableData:",this.originalTableData)
+        console.log("Original TableData collapseAll:",this.tableData)
         // this.drawTable();
     }
 
