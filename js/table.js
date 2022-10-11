@@ -41,7 +41,6 @@ class Table {
         this.scaleX = d3.scaleLinear()
             .domain([-100, 100])
             .range([0, this.vizWidth]);
-
         this.attachSortHandlers();
         this.drawLegend();
     }
@@ -491,7 +490,9 @@ class Table {
          * Attach click handlers to all the th elements inside the columnHeaders row.
          * The handler should sort based on that column and alternate between ascending/descending.
          */
-        const that = this
+        // this.collapseAll();
+        console.log("tabledata inside sortHandler:",this.tableData);
+        const that = this;
         let thSelection = d3.select('#columnHeaders')
                             .selectAll('th')
                             // .data(this.tableData => console.log(this.tableData))
@@ -500,13 +501,13 @@ class Table {
                                 // console.log(d)
                                 // console.log(d.path[0].__data__.key)
                                 // console.log(that.tableData)
-
                                 if (d.path[0].__data__.key === "state"){
                                     d.srcElement.nextElementSibling.__data__.sorted  = false;
                                     d.srcElement.nextElementSibling.__data__.ascending  = false;
                                     d.path[0].__data__.sorted = true;
                                     // console.log(d3.select('#mean_netpartymargin'))
                                     if (d.path[0].__data__.ascending === false) {
+                                        // that.collapseAll();
                                         that.tableData = that.tableData.sort((a,b) => {
                                             return a['state'] < b['state'] ? -1 : 1;
                                         });
@@ -515,6 +516,7 @@ class Table {
                                         that.drawTable();
                                     }
                                     else if (d.path[0].__data__.ascending === true) {
+                                        // that.collapseAll();
                                         that.tableData = that.tableData.sort((a,b) => a["state"] > b["state"] ? -1 : 1);
                                         d.path[0].__data__.ascending = false;
                                         // d.path[0].__data__.sorted = false;
@@ -528,6 +530,7 @@ class Table {
                                     d.srcElement.previousElementSibling.__data__.ascending  = false;
                                     d.path[0].__data__.sorted = true;
                                     if (d.path[0].__data__.ascending === false) {
+                                        // that.collapseAll();
                                         that.tableData = that.tableData.sort((a,b) => {
                                             return Math.abs(a['mean_netpartymargin']) < Math.abs(b['mean_netpartymargin']) ? -1 : 1;
                                         });
@@ -536,6 +539,7 @@ class Table {
                                     that.drawTable();
                                     }
                                     else if (d.path[0].__data__.ascending === true) {
+                                        // that.collapseAll();
                                         that.tableData = that.tableData.sort((a,b) => Math.abs(a['mean_netpartymargin']) > Math.abs(b['mean_netpartymargin']) ? -1 : 1);
                                         d.path[0].__data__.ascending = false;
                                         // d.path[0].__data__.sorted = false;
@@ -609,6 +613,9 @@ class Table {
 
     collapseAll() {
         this.tableData = this.tableData.filter(d => d.isForecast)
+        // this.tableData = this.originalTableData;
+        console.log("tableData collapseAll:",this.tableData)
+        // this.drawTable();
     }
 
 }
